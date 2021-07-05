@@ -59,8 +59,12 @@ namespace TexturePlugin
             if (action != UABEAPluginAction.Import)
                 return false;
 
-            if (selection.Count <= 1)
-                return false;
+            //if (selection.Count <= 1)
+            //    return false;
+            if (selection.Count > 1)
+                name = "Batch Import .png";
+            else
+                name = "Import .png";
 
             int classId = AssetHelper.FindAssetClassByName(am.classFile, "Texture2D").classId;
 
@@ -74,6 +78,8 @@ namespace TexturePlugin
 
         private async Task<bool> ImportTextures(Window win, List<ImportBatchInfo> batchInfos)
         {
+            if (batchInfos == null) 
+                return false;
             foreach (ImportBatchInfo batchInfo in batchInfos)
             {
                 string selectedFilePath = batchInfo.importFile;
@@ -118,6 +124,53 @@ namespace TexturePlugin
 
         public async Task<bool> ExecutePlugin(Window win, AssetWorkspace workspace, List<AssetContainer> selection)
         {
+            if (selection.Count > 1)
+                return await BatchImort(win, workspace, selection);
+            else
+                return await SingleImport(win, workspace, selection);
+        }
+        public async Task<bool> SingleImport(Window win, AssetWorkspace workspace, List<AssetContainer> selection){ 
+            int i=0;
+            selection[i] = new AssetContainer(selection[i], TextureHelper.GetByteArrayTexture(workspace, selection[i]));
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.AllowMultiple = false;
+            ofd.Title = "Select png file";
+            String[] importFiles = await ofd.ShowAsync(win);
+            String importFile = importFiles[0];
+            if (importFile != null && importFile != String.Empty)
+            {
+                List<ImportBatchInfo> batchInfos =new List<ImportBatchInfo>();// await dialog.ShowDialog<List<ImportBatchInfo>>(win);
+                ImportBatchInfo txfile=new ImportBatchInfo();
+  
+                txfile.cont=selection[i];
+                txfile.importFile=importFile;
+        
+                // txfile.assetName=txfile.cont.PathId;
+                // txfile.assetFile=txfile.cont.PathId;
+                txfile.pathId=txfile.cont.PathId;
+    
+                batchInfos.Add(txfile);
+                bool success = await ImportTextures(win, batchInfos);
+                if (success)
+                {
+                    //some of the assets may not get modified, but
+                    //uabe still makes replacers for those anyway
+                    foreach (AssetContainer cont in selection)
+                    {
+                        byte[] savedAsset = cont.TypeInstance.WriteToByteArray();
+                        var replacer = new AssetsReplacerFromMemory(0, cont.PathId, (int)cont.ClassId, cont.MonoId, savedAsset);
+                        workspace.AddReplacer(cont.FileInstance, replacer, new MemoryStream(savedAsset));
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+        public async Task<bool> BatchImort(Window win, AssetWorkspace workspace, List<AssetContainer> selection){ 
             for (int i = 0; i < selection.Count; i++)
             {
                 selection[i] = new AssetContainer(selection[i], TextureHelper.GetByteArrayTexture(workspace, selection[i]));
@@ -170,7 +223,6 @@ namespace TexturePlugin
                 return false;
 
             int classId = AssetHelper.FindAssetClassByName(am.classFile, "Texture2D").classId;
-
             foreach (AssetContainer cont in selection)
             {
                 if (cont.ClassId != classId)
@@ -315,12 +367,9 @@ namespace TexturePlugin
 
             if (action != UABEAPluginAction.Import)
                 return false;
-
             if (selection.Count != 1)
                 return false;
-
             int classId = AssetHelper.FindAssetClassByName(am.classFile, "Texture2D").classId;
-
             foreach (AssetContainer cont in selection)
             {
                 if (cont.ClassId != classId)
@@ -340,10 +389,8 @@ namespace TexturePlugin
             if (saved)
             {
                 byte[] savedAsset = texBaseField.WriteToByteArray();
-
                 var replacer = new AssetsReplacerFromMemory(
                     0, cont.PathId, (int)cont.ClassId, cont.MonoId, savedAsset);
-
                 workspace.AddReplacer(cont.FileInstance, replacer, new MemoryStream(savedAsset));
                 return true;
             }
