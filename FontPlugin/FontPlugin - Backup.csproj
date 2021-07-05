@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UABEAvalonia\UABEAvalonia.csproj" />
+  </ItemGroup>
+
+  <!-- publish event -->
+  <Target Name="CopyLibrariesPublish" DependsOnTargets="BuildNativeAndSetConfig" AfterTargets="Publish" Condition="'$(SolutionDir)' != '*Undefined*'">    
+    <PropertyGroup>
+      <UABEABinDir>$(SolutionDir)UABEAvalonia\$(PublishDir)</UABEABinDir>
+    </PropertyGroup>
+    
+    <!-- copy textoolwrap and deps -->
+    <Copy SourceFiles="$(TexToolWrapBinDir)" DestinationFolder="$(UABEABinDir)runtimes\$(UABEANativeConfig)\native" ContinueOnError="true" />
+    <Copy SourceFiles="$(PVRTexToolBinDir)" DestinationFolder="$(UABEABinDir)runtimes\$(UABEANativeConfig)\native" ContinueOnError="true" />
+    <Copy SourceFiles="$(ISPCBinDir)" DestinationFolder="$(UABEABinDir)runtimes\$(UABEANativeConfig)\native" ContinueOnError="true" />
+    <Copy SourceFiles="$(CrunchBinDir)" DestinationFolder="$(UABEABinDir)runtimes\$(UABEANativeConfig)\native" ContinueOnError="true" />
+    
+    <!-- copy textureplugin -->
+    <Copy SourceFiles="$(OutputPath)TexturePlugin.dll" DestinationFolder="$(UABEABinDir)plugins" ContinueOnError="true" />
+  </Target>
+</Project>
