@@ -20,7 +20,16 @@ namespace UABEAvalonia
             RegexOptions options = 0;
             if (!caseSensitive)
                 options |= RegexOptions.IgnoreCase;
-
+            if (pattern.IndexOf("*") == -1 && pattern.IndexOf("^") == -1)
+            {
+                pattern = "*" + pattern + "*";
+                return Regex.IsMatch(test, "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$", options);
+            }
+            else if (pattern[0] == '^' && pattern.IndexOf("*") == -1)
+            {
+                pattern += "*";
+                return Regex.IsMatch(test,"^"+ Regex.Escape(pattern.Substring(1)).Replace("\\*", ".*") + "$", options);
+            }
             return Regex.IsMatch(test, "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$", options);
         }
 

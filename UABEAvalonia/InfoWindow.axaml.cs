@@ -117,6 +117,9 @@ namespace UABEAvalonia
             if (e.Key == Key.F3)
             {
                 NextSearch();
+            }else if (e.Key==Key.F && e.KeyModifiers== KeyModifiers.Control)
+            {
+                MenuSearchByName_Click(sender,null);
             }
         }
 
@@ -671,6 +674,7 @@ namespace UABEAvalonia
         private async void NextSearch()
         {
             bool foundResult = false;
+            int _searchStart = searchStart;
             if (searching)
             {
                 List<AssetInfoDataGridItem> itemList = dataGrid.Items.Cast<AssetInfoDataGridItem>().ToList();
@@ -708,12 +712,19 @@ namespace UABEAvalonia
 
             if (!foundResult)
             {
-                await MessageBoxUtil.ShowDialog(this, "Search end", "Can't find any assets that match.");
-
-                searchText = "";
-                searchStart = 0;
-                searchDown = false;
-                searching = false;
+                if (_searchStart > 0)
+                {
+                    searchStart = 0;
+                    NextSearch();
+                }
+                else
+                {
+                    await MessageBoxUtil.ShowDialog(this, "Search end", "Can't find any assets that match.");
+                    //searchText = "";
+                    searchStart = 0;
+                    //searchDown = false;
+                    //searching = false;
+                }
                 return;
             }
         }

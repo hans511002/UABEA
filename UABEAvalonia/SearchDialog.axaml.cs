@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Input;
+
 
 namespace UABEAvalonia
 {
@@ -28,8 +30,20 @@ namespace UABEAvalonia
             btnOk = this.FindControl<Button>("btnOk");
             btnCancel = this.FindControl<Button>("btnCancel");
             //generated events
+            KeyDown += Search_KeyDown;
             btnOk.Click += BtnOk_Click;
             btnCancel.Click += BtnCancel_Click;
+        }
+        private void Search_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                BtnOk_Click(sender,null);
+            }
+            else
+            {
+                boxName.Focus();
+            }
         }
 
         private void BtnOk_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
