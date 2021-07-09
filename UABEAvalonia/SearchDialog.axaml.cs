@@ -40,6 +40,10 @@ namespace UABEAvalonia
             {
                 BtnOk_Click(sender,null);
             }
+            else if (e.Key == Key.Cancel)
+            {
+                BtnCancel_Click(sender, null);
+            } 
             else
             {
                 boxName.Focus();
